@@ -1,0 +1,40 @@
+language: cpp
+
+compiler:
+- gcc
+- clang
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "f1/lrl+rrJzuLaIfVtkCN4HtE5m4tMij9wzMeXsNmaA9ob2C4Q+qkNK2aq53QWQHoawtuWSDHGufctjYjbZaXXjTuWab7Gd7OfR5S8BsUHklTP7eJE+qmpOYtlBy+2Fw16y3WKGwdEyeb55zD/JPlNa+zui9DlDYZSU92cBhNJg26qdDtftcdM2Qc5gmt8P0zsqijVbLSSsgSi8nGs1JSRmP88jxpZFRA5dLLT9bQSGGqs4teRgqUC9G+41cojuUCffnHQfIbtrzuDT2JI2Xw8zKiBDxjHURul0GuSkB+IbG/jt9hrVH3JW80qDLVPOC/964NrZRIqaRH0oT/qwZ0fRSA3wjGAT0CJPQMZcx0iHQ3OYoa/0mhi/XPqjGOy+s10h0nGfEWKMrTo1LGE+53pPdLv4yJt5yaD0KmrMoA3xyACqIC6DmJRfAu8ZsO7moq1zYzNUkg9zmOJny0cYsPfJ0lYI0QQfKrETvg6ReZUyf3IGAj4xlOlfbd7gS+axGtrlH9Btkie+lTUOBRF4l89nx4w1YX1y7HQ+3ogF95Vcnn+9HHaG5VgO2i/R7Ca8+3wmDOpO4x1Pa6BWLyZuuHGRps6j0KTuZzRvt+S0R9a8uK7s86VHUPStOE5Y6bcH8DdSveExd138y55oVkcDGNlj1VRLd2qp/2qXWVxUPDqc="
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq --fix-missing
+        build-essential
+        autoconf
+        gnome-common
+        libglib2.0-dev
+        libgtk2.0-dev
+        libgmime-2.6-dev
+        libgtkspell-dev
+        libenchant-dev
+        libnotify-dev
+        libgnome-keyring-dev
+        libgnutls28-dev
+    - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  coverity_scan:
+    project:
+      name: "pmkovar/pan2"
+      description: "Build submitted via Travis CI"
+    notification_email: pknbe@volny.cz
+    build_command_prepend: "./autogen.sh --with-gnutls --with-dbus --with-gmime-crypto --with-gtkspell --enable-libnotify --enable-gkr"
+    build_command: "make"
+    branch_pattern: master
+
+script:
+- ./autogen.sh --with-gnutls --with-dbus --with-gmime-crypto --with-gtkspell --enable-libnotify --enable-gkr && make clean && make check
